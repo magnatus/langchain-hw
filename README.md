@@ -100,6 +100,27 @@ Errors: none
 
 See [`prompts/user_templates.md`](prompts/user_templates.md) for more examples.
 
+## Manual verification
+
+Detailed verification results are stored in `tests/manual_test_results.md`.
+
+Required test requests:
+
+1. `создай заявку: не работает VPN, приоритет высокий`
+2. `покажи заявку 1`
+3. `переведи заявку 1 в статус in_progress`
+4. `покажи все заявки`
+5. `сколько заявок по статусам?`
+
+Additional unsupported request:
+
+6. `расскажи анекдот`
+
+At least **five** requests were executed and at least **three** of them caused
+real API tool calls (in this run, scenarios 1–5 all triggered real tool calls,
+emitting `[TOOL CALL] ...` debug output). The unsupported request returned the
+fixed contract with `Status: error` and made no tool call.
+
 ## Mock Task API
 
 A local, in-memory FastAPI helpdesk/task management service that the agent

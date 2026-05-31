@@ -134,6 +134,35 @@ CLI (`app/cli.py`) разбирает аргументы командной ст
 
 См. [`tests/manual_test_results.md`](tests/manual_test_results.md).
 
+## Manual verification summary
+
+- **6 сценариев выполнено** (дата прогона: 2026-05-31, модель `qwen3:8b`).
+- **5 сценариев вызвали реальные обращения к API** через инструменты
+  (`create_task`, `get_task`, `update_task_status`, `list_tasks`,
+  `get_task_stats`).
+- **1 неподдерживаемый сценарий** (`расскажи анекдот`) вернул `Status: error`
+  без вызова инструментов.
+- Все успешные API-сценарии вернули ответ в фиксированном контракте.
+
+Пример:
+
+```text
+Natural-language request:
+создай заявку: не работает VPN, приоритет высокий
+
+Expected API method:
+create_task -> POST /tasks
+
+Actual debug evidence:
+[TOOL CALL] create_task -> POST http://localhost:8000/tasks payload={'title': 'не работает VPN', 'priority': 'high', 'description': ''}
+
+Result:
+Status: success
+```
+
+Полные результаты по каждому сценарию — в
+[`tests/manual_test_results.md`](tests/manual_test_results.md).
+
 ## Выводы
 
 TODO.

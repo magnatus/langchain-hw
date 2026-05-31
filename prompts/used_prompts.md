@@ -773,3 +773,258 @@ Show:
 * Validation command results.
 * Reminder that nothing was committed.
 ```
+
+## Prompt 6 — Manual verification scenarios
+
+Date: 2026-05-31
+
+Purpose: Run and document required manual verification scenarios.
+
+Prompt:
+
+```text
+We need to continue implementing the homework project in the current repository `langchain-hw`.
+
+Current state:
+
+* Local FastAPI Task API is implemented.
+* LangChain tools are implemented and make real HTTP calls.
+* LangChain agent and CLI are implemented.
+* The default Ollama model has been switched to `qwen3:8b`.
+* The agent can be launched with:
+  uv run python main.py "<user request>"
+* The project uses `uv`.
+* All development prompts must be tracked in `prompts/used_prompts.md`.
+
+Task for this step:
+Run and document the required manual verification scenarios for the homework submission.
+
+Important homework requirements:
+
+* Execute at least 5 different natural-language user requests.
+* At least 3 requests must lead to real API tool calls.
+* Record the requests and actual responses.
+* Include evidence of tool calls where applicable, especially `[TOOL CALL] ...` debug output.
+* Confirm that the final agent response follows the fixed contract.
+
+Fixed response contract:
+
+    Status: success | error
+    Action: <short description of what was done or attempted>
+    Data: <structured API result or null>
+    Errors: <error details or none>
+
+Before running tests:
+
+1. Make sure the API is running:
+
+    uv run uvicorn app.api:app --reload
+
+2. Make sure Ollama is available:
+
+    ollama list
+
+3. Use `qwen3:8b` consistently for all test runs.
+
+If `.env` does not exist, create it from `.env.example`:
+
+    cp .env.example .env
+
+Then verify that `.env` contains:
+
+    LLM_PROVIDER=ollama
+    OLLAMA_MODEL=qwen3:8b
+    TASK_API_BASE_URL=http://localhost:8000
+
+Important:
+
+* Do not commit `.env`.
+* Do not include secrets or private credentials in any tracked file.
+* `.env` should remain ignored by git.
+
+Manual test scenarios to run:
+
+1. Create task
+
+User request:
+    создай заявку: не работает VPN, приоритет высокий
+Expected tool/API:
+    create_task -> POST /tasks
+Expected evidence:
+    [TOOL CALL] create_task -> POST http://localhost:8000/tasks ...
+
+2. Get task
+
+User request:
+    покажи заявку 1
+Expected tool/API:
+    get_task -> GET /tasks/1
+Expected evidence:
+    [TOOL CALL] get_task -> GET http://localhost:8000/tasks/1
+
+3. Update task status
+
+User request:
+    переведи заявку 1 в статус in_progress
+Expected tool/API:
+    update_task_status -> PATCH /tasks/1/status
+Expected evidence:
+    [TOOL CALL] update_task_status -> PATCH http://localhost:8000/tasks/1/status ...
+
+4. List tasks
+
+User request:
+    покажи все заявки
+Expected tool/API:
+    list_tasks -> GET /tasks
+Expected evidence:
+    [TOOL CALL] list_tasks -> GET http://localhost:8000/tasks
+
+5. Get task statistics
+
+User request:
+    сколько заявок по статусам?
+Expected tool/API:
+    get_task_stats -> GET /stats
+Expected evidence:
+    [TOOL CALL] get_task_stats -> GET http://localhost:8000/stats
+
+6. Unsupported request
+
+User request:
+    расскажи анекдот
+Expected behavior:
+    No API tool call.
+    Final response should use the fixed contract with Status: error.
+
+Commands to run from another terminal while API is running:
+
+    uv run python main.py "создай заявку: не работает VPN, приоритет высокий"
+    uv run python main.py "покажи заявку 1"
+    uv run python main.py "переведи заявку 1 в статус in_progress"
+    uv run python main.py "покажи все заявки"
+    uv run python main.py "сколько заявок по статусам?"
+    uv run python main.py "расскажи анекдот"
+
+Files to update:
+
+* `tests/manual_test_results.md`
+* `README.md`
+* `report.md`
+* `prompts/used_prompts.md`
+
+Documentation requirements:
+
+1. Update `tests/manual_test_results.md`.
+
+Create a clear Markdown section for the test run.
+
+Include:
+
+* Test date.
+* LLM provider: Ollama.
+* Model: `qwen3:8b`.
+* API base URL: `http://localhost:8000`.
+* API start command.
+* Agent command format.
+* A table or individual sections for each test.
+
+For each test include:
+
+* Test number.
+* User request.
+* Expected tool/API method.
+* Actual command.
+* Actual output.
+* Captured `[TOOL CALL] ...` line when present.
+* Whether the response followed the fixed contract.
+* Result: passed/failed.
+* Notes if relevant.
+
+2. Update `README.md`.
+
+Add or update a short section:
+
+    ## Manual verification
+
+    Detailed verification results are stored in `tests/manual_test_results.md`.
+
+    Required test requests:
+
+    1. `создай заявку: не работает VPN, приоритет высокий`
+    2. `покажи заявку 1`
+    3. `переведи заявку 1 в статус in_progress`
+    4. `покажи все заявки`
+    5. `сколько заявок по статусам?`
+
+    Additional unsupported request:
+
+    6. `расскажи анекдот`
+
+Mention that at least five requests were executed and at least three caused real API tool calls.
+
+3. Update `report.md`.
+
+Add or update a section:
+
+    ## Manual verification summary
+
+Include:
+
+* 6 scenarios executed.
+* 5 scenarios caused real API tool calls.
+* 1 unsupported scenario returned `Status: error` without an API call.
+* All successful API scenarios returned the fixed response contract.
+* Model used: `qwen3:8b`.
+
+Include at least one explicit example:
+
+    Natural-language request:
+    создай заявку: не работает VPN, приоритет высокий
+
+    Expected API method:
+    create_task -> POST /tasks
+
+    Actual debug evidence:
+    [TOOL CALL] create_task -> POST http://localhost:8000/tasks ...
+
+    Result:
+    Status: success
+
+4. Append this full prompt as a new section in `prompts/used_prompts.md`.
+
+Section title:
+    ## Prompt 6 — Manual verification scenarios
+
+Include:
+
+* Date: current date.
+* Purpose: Run and document required manual verification scenarios.
+* Full prompt text in a fenced `text` block.
+
+Important:
+
+* Do not edit previous prompt entries.
+* Append only.
+
+5. Validate.
+
+Run:
+    uv run python -m compileall app
+Show:
+    git status --short
+
+6. Do not commit anything.
+
+7. Final response after changes.
+
+Show:
+
+* Commands used for the test run.
+* Modified files.
+* Summary table of passed/failed tests.
+* Which tests caused tool calls.
+* Which test did not call tools.
+* Any issues or flaky behavior observed.
+* Confirmation that nothing was committed.
+```
