@@ -451,3 +451,160 @@ Examples:
     * The tool names and matching API methods.
     * How to manually test at least one tool.
 ```
+
+## Prompt 4 — LangChain agent and CLI
+
+Date: 2026-05-31
+
+Purpose: Implement LangChain agent and CLI entrypoint.
+
+Prompt:
+
+```text
+We need to continue implementing the homework project in the current repository `langchain-hw`.
+
+Current state:
+
+* The project uses `uv`.
+* Local FastAPI mock API is implemented in `app/api.py`.
+* LangChain tools are implemented in `app/tools/task_api_tool.py`.
+* Tools call the local API through real HTTP requests.
+* Tools print debug output like `[TOOL CALL] ...`.
+* We must keep tracking all development prompts in `prompts/used_prompts.md`.
+
+Task for this step:
+Implement the LangChain agent and CLI entrypoint.
+
+Homework requirements this step must satisfy:
+
+* The agent accepts a natural-language user request.
+* The agent interprets the user intent.
+* The agent chooses and calls the correct API tool when appropriate.
+* The final answer follows a fixed response contract.
+* The agent can be launched from CLI.
+
+Files to modify:
+
+* `app/agent.py`
+* `app/cli.py`
+* `main.py`
+* `prompts/system.md`
+* `prompts/user_templates.md`
+* `README.md`
+* `report.md`
+* `prompts/used_prompts.md`
+
+Implementation requirements:
+
+1. Use Ollama as the default LLM provider through `langchain-ollama`.
+
+2. Read configuration from environment:
+
+   * `OLLAMA_MODEL`
+   * default: `qwen2.5:7b-instruct`
+   * `LLM_PROVIDER`
+   * default: `ollama`
+
+3. Load `.env` using `python-dotenv`.
+
+4. Use the existing tools exported as:
+
+   * `TASK_TOOLS` from `app.tools.task_api_tool`
+
+5. Implement `app/agent.py` with:
+
+   * `load_system_prompt()`
+   * `build_agent()`
+   * `run_agent(user_input: str) -> str`
+
+6. Prefer the current LangChain API for agent creation.
+
+   * Use `create_agent` if available in the installed LangChain version.
+   * If the installed version requires another compatible approach, use the modern recommended API for the installed version.
+   * Keep the implementation simple and readable.
+
+7. The system prompt must define the agent as an API operator.
+
+8. The system prompt must include these rules:
+
+   * The agent manages tasks through tools only.
+   * The agent must not invent API results.
+   * For create/get/update/list/stats operations, it must call the appropriate tool.
+   * If the user request is unrelated to task API operations, return an error in the fixed response format.
+   * Final response must strictly follow this contract:
+
+    Status: success | error
+    Action: <short description of what was done or attempted>
+    Data: <structured API result or null>
+    Errors: <error details or none>
+
+9. The final answer returned to the user must be in the exact contract above.
+
+   * Do not wrap it in Markdown.
+   * Do not add extra commentary before or after the contract.
+
+10. Implement `app/cli.py`:
+
+    * Parse the user's request from command line arguments.
+    * If no argument is provided, print usage and exit with code 1.
+    * Call `run_agent(user_input)`.
+    * Print the final response.
+    * Keep stack traces out of normal user output; handle exceptions and return the response contract with `Status: error`.
+
+11. Implement root `main.py`:
+
+    * Thin entrypoint that calls `app.cli.main()`.
+
+12. Update `prompts/system.md` with the actual system prompt used by the agent.
+
+13. Update `prompts/user_templates.md` with example user request templates:
+
+    * Create task
+    * Get task
+    * Update status
+    * List tasks
+    * Get stats
+    * Unsupported request
+
+14. Update README.md:
+
+    * Add instructions for running the agent:
+
+      * Start API:
+        `uv run uvicorn app.api:app --reload`
+      * In another terminal, run:
+        `uv run python main.py "создай заявку: не работает VPN, приоритет высокий"`
+    * Add the response contract section.
+    * Add example requests.
+
+15. Update report.md:
+
+    * Add a section describing the agent implementation.
+    * Mention where the response contract is documented.
+    * Add placeholders for line references:
+
+      * `app/agent.py:Lx-Ly` — agent creation
+      * `app/cli.py:Lx-Ly` — CLI launch
+      * `prompts/system.md:Lx-Ly` — response contract
+
+16. Append this full prompt as a new section in `prompts/used_prompts.md`:
+
+    Section title:
+    `## Prompt 4 — LangChain agent and CLI`
+
+    Include:
+
+    * Date: current date.
+    * Purpose: Implement LangChain agent and CLI entrypoint.
+    * Full prompt text in a fenced `text` block.
+
+17. Do not commit anything.
+
+18. After changes, show:
+
+    * Modified files.
+    * Short implementation summary.
+    * Exact command to run the API.
+    * Exact command to run the agent.
+    * One example expected output.
+```

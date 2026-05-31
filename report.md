@@ -71,6 +71,51 @@ API является **локальным** и хранит данные **в п
   (`_handle_response`, `_handle_exception`).
 - `app/tools/task_api_tool.py:164-170` — экспорт списка `TASK_TOOLS`.
 
+## Агент и CLI
+
+Агент реализован на LangChain 1.x с использованием `create_agent` и провайдера
+**Ollama** (`langchain-ollama.ChatOllama`). Модель и провайдер настраиваются
+через переменные окружения `OLLAMA_MODEL` (по умолчанию `qwen2.5:7b-instruct`)
+и `LLM_PROVIDER` (по умолчанию `ollama`); `.env` загружается через
+`python-dotenv`.
+
+Агент:
+
+1. принимает запрос на естественном языке;
+2. интерпретирует намерение пользователя;
+3. при необходимости вызывает подходящий инструмент из `TASK_TOOLS`
+   (реальный HTTP-запрос к локальному API);
+4. возвращает финальный ответ строго по фиксированному контракту.
+
+Запросы, не относящиеся к операциям с задачами, не вызывают инструментов и
+возвращаются с `Status: error`.
+
+**Контракт ответа** задаётся в системном промпте и используется во всех
+ответах агента:
+
+```text
+Status: success | error
+Action: <short description of what was done or attempted>
+Data: <structured API result or null>
+Errors: <error details or none>
+```
+
+CLI (`app/cli.py`) разбирает аргументы командной строки, при отсутствии запроса
+печатает usage и завершается с кодом 1, а при исключениях возвращает контракт
+с `Status: error` без вывода трассировки стека. Точка входа — `main.py`,
+которая вызывает `app.cli.main()`.
+
+### Ссылки на строки кода
+
+(Актуально на момент реализации; обновлять при изменении файлов.)
+
+- `app/agent.py:33-52` — создание агента (`build_agent`, вызов `create_agent`).
+- `app/agent.py:55-64` — запуск агента (`run_agent`, `agent.invoke`).
+- `app/agent.py:28-30` — загрузка системного промпта (`load_system_prompt`).
+- `app/cli.py:24-40` — запуск из CLI (разбор аргументов, вызов `run_agent`,
+  обработка ошибок).
+- `prompts/system.md:31-40` — контракт ответа (response contract).
+
 ## Использованные промпты
 
 См. [`prompts/used_prompts.md`](prompts/used_prompts.md).

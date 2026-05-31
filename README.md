@@ -27,6 +27,62 @@ uv run uvicorn app.api:app --reload
 uv run python main.py "создай заявку: не работает VPN, приоритет высокий"
 ```
 
+## Running the agent
+
+The agent uses **Ollama** as the LLM provider. Make sure Ollama is running and
+the configured model is pulled (default `qwen2.5:7b-instruct`):
+
+```bash
+ollama serve            # if not already running
+ollama pull qwen2.5:7b-instruct
+```
+
+Then:
+
+```bash
+# 1. Start the mock API (terminal 1)
+uv run uvicorn app.api:app --reload
+
+# 2. Run the agent with a natural-language request (terminal 2)
+uv run python main.py "создай заявку: не работает VPN, приоритет высокий"
+```
+
+Configuration is read from `.env` (see `.env.example`): `LLM_PROVIDER`,
+`OLLAMA_MODEL`, `TASK_API_BASE_URL`.
+
+### Response contract
+
+The agent's final answer always follows this exact plain-text format — no
+Markdown, no extra commentary:
+
+```text
+Status: success | error
+Action: <short description of what was done or attempted>
+Data: <structured API result or null>
+Errors: <error details or none>
+```
+
+### Example requests
+
+```bash
+uv run python main.py "создай заявку: не работает VPN, приоритет высокий"
+uv run python main.py "покажи заявку 1"
+uv run python main.py "переведи заявку 1 в статус in_progress"
+uv run python main.py "покажи все заявки"
+uv run python main.py "покажи статистику по заявкам"
+```
+
+Example output for the create request:
+
+```text
+Status: success
+Action: create task
+Data: {"id": 1, "title": "не работает VPN", "priority": "high", "status": "new"}
+Errors: none
+```
+
+See [`prompts/user_templates.md`](prompts/user_templates.md) for more examples.
+
 ## Mock Task API
 
 A local, in-memory FastAPI helpdesk/task management service that the agent

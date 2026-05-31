@@ -1,41 +1,64 @@
 """LangChain agent assembly.
 
-Builds an agent backed by Ollama that can call the task API tools to
-satisfy a natural-language request.
-
-TODO:
-    - Load the system prompt from prompts/system.md.
-    - Construct the Ollama chat model from environment configuration.
-    - Bind the task API tools and build the agent executor.
-    - Return a structured response with execution status.
+Builds an agent backed by Ollama (via `langchain-ollama`) that interprets a
+natural-language request and calls the Task API tools to satisfy it. The
+agent's final answer follows the fixed response contract documented in
+`prompts/system.md`.
 """
 
 from __future__ import annotations
 
 import os
+from pathlib import Path
+
+from dotenv import load_dotenv
+from langchain.agents import create_agent
+from langchain_ollama import ChatOllama
+
+from app.tools.task_api_tool import TASK_TOOLS
+
+load_dotenv()
+
+DEFAULT_MODEL = "qwen2.5:7b-instruct"
+DEFAULT_PROVIDER = "ollama"
+
+_SYSTEM_PROMPT_PATH = Path(__file__).resolve().parent.parent / "prompts" / "system.md"
+
+
+def load_system_prompt() -> str:
+    """Load the agent system prompt from `prompts/system.md`."""
+    return _SYSTEM_PROMPT_PATH.read_text(encoding="utf-8")
 
 
 def build_agent():
-    """Build and return the LangChain agent executor.
+    """Build and return the LangChain agent.
 
-    Placeholder: full implementation comes in a later step.
+    Uses Ollama as the LLM provider (configurable via `LLM_PROVIDER` /
+    `OLLAMA_MODEL`) and binds the Task API tools.
     """
-    provider = os.getenv("LLM_PROVIDER", "ollama")
-    model = os.getenv("OLLAMA_MODEL", "qwen2.5:7b-instruct")
-    # TODO: instantiate ChatOllama, load tools, build agent.
-    raise NotImplementedError(
-        f"Agent not implemented yet (provider={provider}, model={model})."
+    provider = os.getenv("LLM_PROVIDER", DEFAULT_PROVIDER)
+    if provider != "ollama":
+        raise ValueError(
+            f"Unsupported LLM_PROVIDER '{provider}'. Only 'ollama' is supported."
+        )
+
+    model_name = os.getenv("OLLAMA_MODEL", DEFAULT_MODEL)
+    model = ChatOllama(model=model_name, temperature=0)
+
+    return create_agent(
+        model,
+        TASK_TOOLS,
+        system_prompt=load_system_prompt(),
     )
 
 
-def run_agent(user_request: str) -> dict:
+def run_agent(user_input: str) -> str:
     """Run the agent against a natural-language request.
 
-    Returns a structured response dict. Placeholder for now.
+    Returns the agent's final answer as plain text following the response
+    contract from the system prompt.
     """
-    # TODO: invoke the agent executor and normalize its output.
-    return {
-        "status": "not_implemented",
-        "request": user_request,
-        "result": None,
-    }
+    agent = build_agent()
+    result = agent.invoke({"messages": [{"role": "user", "content": user_input}]})
+    messages = result["messages"]
+    return messages[-1].content
