@@ -120,3 +120,141 @@ After creating files:
 2. Show a short summary of created files.
 3. Confirm that `prompts/used_prompts.md` contains this prompt.
 ```
+
+## Prompt 2 — Local FastAPI mock API
+
+Date: 2026-05-31
+
+Purpose: Implement local FastAPI mock API for task management.
+
+Prompt:
+
+```text
+We need to continue implementing the homework project in the current repository `langchain-hw`.
+
+Current state:
+
+* The project scaffold already exists.
+* The project uses `uv`.
+* Dependencies are already defined in `pyproject.toml`.
+* We must keep tracking all development prompts in `prompts/used_prompts.md`.
+
+Task for this step:
+Implement the local FastAPI mock API that the LangChain tools will call later.
+
+API domain:
+A minimal helpdesk/task management API.
+
+Implement `app/api.py` with FastAPI.
+
+Requirements:
+
+1. Define a FastAPI app instance named `app`.
+
+2. Use in-memory storage only. No database is needed.
+
+3. Support the following operations:
+
+   * `POST /tasks`
+
+     * Creates a task.
+     * Request body fields:
+
+       * `title`: string, required
+       * `priority`: string, optional, default `normal`
+       * `description`: string, optional
+     * Response should include:
+
+       * `id`
+       * `title`
+       * `priority`
+       * `description`
+       * `status`
+       * `created_at`
+     * Default status: `new`.
+
+   * `GET /tasks/{task_id}`
+
+     * Returns a task by id.
+     * If not found, return HTTP 404 with a clear error message.
+
+   * `PATCH /tasks/{task_id}/status`
+
+     * Updates task status.
+     * Request body:
+
+       * `status`: string, required
+     * Allowed statuses:
+
+       * `new`
+       * `in_progress`
+       * `resolved`
+       * `closed`
+     * If task is not found, return HTTP 404.
+     * If status is invalid, return HTTP 400.
+
+   * `GET /tasks`
+
+     * Returns all tasks.
+     * Optional query parameters:
+
+       * `status`
+       * `priority`
+     * Filters tasks if query parameters are provided.
+
+   * `GET /stats`
+
+     * Returns task statistics:
+
+       * `total`
+       * `by_status`
+       * `by_priority`
+
+4. Add a root endpoint:
+
+   * `GET /`
+   * Return a simple JSON object with API name and available endpoints.
+
+5. Add a health endpoint:
+
+   * `GET /health`
+   * Return `{"status": "ok"}`.
+
+6. Use Pydantic models for request/response schemas where appropriate.
+
+7. Keep the implementation simple and readable.
+
+8. Add direct run instructions to README.md:
+
+   * How to start API:
+     `uv run uvicorn app.api:app --reload`
+   * How to open docs:
+     `http://localhost:8000/docs`
+   * How to test with curl.
+
+9. Add a short section to `report.md`:
+
+   * API domain selected.
+   * Supported operations.
+   * Mention that the API is local and in-memory.
+
+10. Append this full prompt as a new section in `prompts/used_prompts.md`:
+
+Section title:
+`## Prompt 2 — Local FastAPI mock API`
+
+Include:
+
+* Date: current date.
+* Purpose: Implement local FastAPI mock API for task management.
+* Full prompt text in a fenced `text` block.
+
+11. Do not commit anything.
+
+12. After changes, show:
+
+* Modified files.
+* A short implementation summary.
+* Commands to run the API.
+* One example curl command for creating a task.
+```
