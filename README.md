@@ -27,14 +27,34 @@ uv run uvicorn app.api:app --reload
 uv run python main.py "создай заявку: не работает VPN, приоритет высокий"
 ```
 
+## Local setup
+
+The default LLM provider is **Ollama** and the default model is **`qwen3:8b`**.
+
+```bash
+# 1. Check which models are installed
+ollama list
+
+# 2. Pull the default model if it is missing
+ollama pull qwen3:8b
+
+# 3. Create your local .env from the example
+cp .env.example .env
+```
+
+`.env` is **local only and must not be committed** — it is git-ignored. Only
+`.env.example` (safe example values) is tracked.
+
+Configuration keys (see `.env.example`): `LLM_PROVIDER`, `OLLAMA_MODEL`,
+`TASK_API_BASE_URL`.
+
 ## Running the agent
 
-The agent uses **Ollama** as the LLM provider. Make sure Ollama is running and
-the configured model is pulled (default `qwen2.5:7b-instruct`):
+The agent uses **Ollama** as the LLM provider (default model `qwen3:8b`). Make
+sure Ollama is running:
 
 ```bash
 ollama serve            # if not already running
-ollama pull qwen2.5:7b-instruct
 ```
 
 Then:
@@ -46,9 +66,6 @@ uv run uvicorn app.api:app --reload
 # 2. Run the agent with a natural-language request (terminal 2)
 uv run python main.py "создай заявку: не работает VPN, приоритет высокий"
 ```
-
-Configuration is read from `.env` (see `.env.example`): `LLM_PROVIDER`,
-`OLLAMA_MODEL`, `TASK_API_BASE_URL`.
 
 ### Response contract
 

@@ -19,7 +19,7 @@ from app.tools.task_api_tool import TASK_TOOLS
 
 load_dotenv()
 
-DEFAULT_MODEL = "qwen2.5:7b-instruct"
+DEFAULT_MODEL = "qwen3:8b"
 DEFAULT_PROVIDER = "ollama"
 
 _SYSTEM_PROMPT_PATH = Path(__file__).resolve().parent.parent / "prompts" / "system.md"
