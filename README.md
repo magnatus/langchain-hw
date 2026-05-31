@@ -2,8 +2,6 @@
 
 A minimal LangChain AI agent that acts as a natural-language wrapper over an API.
 
-> ⚠️ **Work in progress.** This README is a placeholder and will be completed in a later step.
-
 ## Overview
 
 The agent accepts a natural-language request, interprets the user's intent,
@@ -14,7 +12,7 @@ response with execution status.
 - **API domain:** local FastAPI mock service
 - **Dependency management:** [`uv`](https://docs.astral.sh/uv/)
 
-## Quick start (planned)
+## Quick start
 
 ```bash
 # 1. Copy environment template
@@ -217,4 +215,13 @@ prompts/    system / user prompt templates and prompt log
 tests/      manual test results
 ```
 
-TODO: full setup, configuration, and usage documentation.
+## Documentation
+
+- [`report.md`](report.md) — project report (architecture, tools, line
+  references, verification summary, submission checklist).
+- [`prompts/used_prompts.md`](prompts/used_prompts.md) — all development
+  prompts used (homework section "Использованные промпты").
+- [`prompts/system.md`](prompts/system.md) — the agent's system prompt.
+- [`prompts/user_templates.md`](prompts/user_templates.md) — example requests.
+- [`tests/manual_test_results.md`](tests/manual_test_results.md) — manual
+  verification results.

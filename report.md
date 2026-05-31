@@ -1,14 +1,52 @@
-# Report (placeholder)
-
-> ⚠️ **Work in progress.** This report will be completed later.
+# Report
 
 ## Цель проекта
 
 Минимальный LangChain-агент — обёртка над API на естественном языке.
+Пользователь формулирует запрос на естественном языке через CLI, агент
+интерпретирует намерение, при необходимости вызывает соответствующий
+инструмент (реальный HTTP-запрос к локальному API) и возвращает структурированный
+ответ в фиксированном формате.
 
 ## Архитектура
 
-TODO: описать компоненты (CLI, agent, tools, mock API).
+Компоненты проекта:
+
+- **`main.py`** — точка входа, вызывает `app.cli.main()`.
+- **`app/cli.py`** — CLI: разбирает запрос из аргументов, вызывает агента,
+  печатает ответ; ошибки оборачивает в контракт `Status: error`.
+- **`app/agent.py`** — сборка LangChain-агента (`create_agent`) на провайдере
+  Ollama (`langchain-ollama.ChatOllama`), загрузка системного промпта,
+  функция `run_agent`.
+- **`app/tools/task_api_tool.py`** — LangChain-инструменты (`@tool`),
+  выполняющие реальные HTTP-запросы к API через `requests`.
+- **`app/api.py`** — локальный mock Task API на FastAPI (in-memory).
+- **`prompts/`** — системный промпт, шаблоны пользовательских запросов,
+  журнал использованных промптов.
+
+Поток выполнения:
+
+```text
+CLI (main.py / app/cli.py)
+   -> run_agent (app/agent.py)
+      -> LLM (Ollama, qwen3:8b) выбирает инструмент
+         -> TASK_TOOLS (app/tools/task_api_tool.py) -> HTTP -> FastAPI (app/api.py)
+   <- финальный ответ в фиксированном контракте
+```
+
+## Запуск
+
+```bash
+# 1. Подготовка модели и окружения
+ollama pull qwen3:8b
+cp .env.example .env
+
+# 2. Запуск API (терминал 1)
+uv run uvicorn app.api:app --reload
+
+# 3. Запуск агента (терминал 2)
+uv run python main.py "создай заявку: не работает VPN, приоритет высокий"
+```
 
 ## API (mock)
 
@@ -163,6 +201,32 @@ Status: success
 Полные результаты по каждому сценарию — в
 [`tests/manual_test_results.md`](tests/manual_test_results.md).
 
+## Обработка секретов
+
+- Реальные значения окружения хранятся только в локальном файле `.env`,
+  который **игнорируется git** (см. `.gitignore`) и не коммитится.
+- В репозиторий попадает только `.env.example` с безопасными примерными
+  значениями (без реальных учётных данных).
+- Секреты или приватные креды в отслеживаемых файлах отсутствуют.
+
+## Submission checklist
+
+- [x] Agent runs from CLI
+- [x] Local API implemented
+- [x] LangChain tools implemented
+- [x] Tools make real HTTP calls
+- [x] Tool debug output is printed
+- [x] Fixed response contract documented
+- [x] Manual verification completed
+- [x] Used prompts documented
+- [x] `.env` ignored
+- [x] No secrets committed
+
 ## Выводы
 
-TODO.
+Все критерии приёмки домашнего задания выполнены: агент запускается из CLI,
+реализованы LangChain-инструменты с реальными HTTP-вызовами и отладочным
+выводом `[TOOL CALL] ...`, агент корректно интерпретирует запросы на
+естественном языке и возвращает ответ в фиксированном контракте. Ручная
+проверка (6 сценариев, 5 — с реальными вызовами API) пройдена; использованные
+промпты задокументированы; секреты не коммитятся, `.env` игнорируется.

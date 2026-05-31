@@ -1028,3 +1028,186 @@ Show:
 * Any issues or flaky behavior observed.
 * Confirmation that nothing was committed.
 ```
+
+## Prompt 7 — Final submission review
+
+Date: 2026-05-31
+
+Purpose: Final review and polish for homework submission.
+
+Prompt:
+
+```text
+We need to perform the final review and submission polish for the homework project in the current repository `langchain-hw`.
+
+Current state:
+
+* Local FastAPI Task API is implemented.
+* LangChain tools are implemented and make real HTTP calls.
+* LangChain agent and CLI are implemented.
+* Default Ollama model is `qwen3:8b`.
+* Manual verification has been completed:
+
+  * 6 scenarios executed.
+  * 5 scenarios caused real API tool calls.
+  * 1 unsupported scenario returned `Status: error` without a tool call.
+* Manual results are documented in `tests/manual_test_results.md`.
+* All development prompts must be tracked in `prompts/used_prompts.md`.
+* Do not commit anything.
+
+Task:
+Perform a final homework-submission review and polish.
+
+Homework acceptance criteria to verify:
+
+1. Agent runs according to repository instructions.
+2. At least one LangChain API tool is implemented with a real API call.
+3. Tool debug output is printed to console, e.g. `[TOOL CALL] ...`.
+4. Agent correctly interprets natural-language requests and chooses the correct tool.
+5. Final answer follows the fixed response contract:
+
+   * `Status: success | error`
+   * `Action: <description>`
+   * `Data: <result or null>`
+   * `Errors: <details or none>`
+6. At least 5 verification requests are documented.
+7. Used prompts are documented in Markdown.
+8. Secrets are not committed.
+9. `.env` is ignored.
+10. README/report clearly explain how to run and verify the project.
+
+Files to inspect and update if needed:
+
+* `README.md`
+* `report.md`
+* `prompts/system.md`
+* `prompts/user_templates.md`
+* `prompts/used_prompts.md`
+* `tests/manual_test_results.md`
+* `.env.example`
+* `.gitignore`
+* `app/api.py`
+* `app/tools/task_api_tool.py`
+* `app/agent.py`
+* `app/cli.py`
+* `main.py`
+
+Required final review actions:
+
+1. Validate code.
+
+Run:
+    uv run python -m compileall app
+
+2. Check git ignore and secrets.
+
+Run:
+    git check-ignore -v .env || true
+    git status --short --ignored
+
+Confirm:
+
+* `.env` is ignored.
+* `.env` is not tracked.
+* No real secrets or credentials are present in tracked files.
+
+3. Check line references.
+
+Use line-number commands to confirm exact line references for the report:
+    nl -ba app/tools/task_api_tool.py | sed -n '1,220p'
+    nl -ba app/agent.py | sed -n '1,140p'
+    nl -ba app/cli.py | sed -n '1,120p'
+    nl -ba prompts/system.md | sed -n '1,120p'
+
+Update `report.md` if needed with concrete line references for:
+
+* LangChain tool declaration and real HTTP call: `app/tools/task_api_tool.py:Lx-Ly`
+* Debug print: `app/tools/task_api_tool.py:Lx`
+* `TASK_TOOLS` export: `app/tools/task_api_tool.py:Lx-Ly`
+* Agent creation: `app/agent.py:Lx-Ly`
+* CLI entrypoint: `app/cli.py:Lx-Ly`
+* Response contract: `prompts/system.md:Lx-Ly`
+
+4. Check README completeness.
+
+README must clearly include:
+
+* Project purpose.
+* LLM provider and model: Ollama + `qwen3:8b`.
+* Environment setup with `uv`.
+* `.env.example` / `.env` setup.
+* API run command.
+* Agent run command.
+* Supported API operations.
+* LangChain tools table.
+* Response contract.
+* Manual verification section.
+* Link/path to `tests/manual_test_results.md`.
+* Path to `prompts/used_prompts.md`.
+
+5. Check report completeness.
+
+`report.md` must clearly include:
+
+* Which LLM is used and how to configure it.
+* Which API is selected and which operations are supported.
+* How to launch API and agent.
+* Tool implementation and line references.
+* Debug output line reference.
+* Response contract location.
+* 5+ test requests and results.
+* Used prompts location.
+* Secrets handling note.
+
+6. Check prompt tracking.
+
+Verify that `prompts/used_prompts.md` includes sections:
+
+* Prompt 1 — Project scaffold
+* Prompt 2 — Local FastAPI mock API
+* Prompt 3 — LangChain API tools
+* Prompt 4 — LangChain agent and CLI
+* Prompt 5 — Switch default Ollama model to qwen3:8b
+* Prompt 6 — Manual verification scenarios
+
+Append this full prompt as a new section:
+    ## Prompt 7 — Final submission review
+
+Include:
+
+* Date: current date.
+* Purpose: Final review and polish for homework submission.
+* Full prompt text in a fenced `text` block.
+
+Important:
+
+* Do not edit previous prompt entries.
+* Append only.
+
+7. Produce final checklist.
+
+Add or update a final checklist in `report.md`:
+    ## Submission checklist
+
+    - [x] Agent runs from CLI
+    - [x] Local API implemented
+    - [x] LangChain tools implemented
+    - [x] Tools make real HTTP calls
+    - [x] Tool debug output is printed
+    - [x] Fixed response contract documented
+    - [x] Manual verification completed
+    - [x] Used prompts documented
+    - [x] `.env` ignored
+    - [x] No secrets committed
+
+8. Final output.
+
+After review and edits, show:
+
+* Modified files.
+* Validation results.
+* Final line references.
+* Any issues found and fixed.
+* Any remaining concerns.
+* Git commands to commit and push.
+```
