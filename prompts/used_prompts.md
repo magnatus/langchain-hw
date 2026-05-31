@@ -258,3 +258,196 @@ Include:
 * Commands to run the API.
 * One example curl command for creating a task.
 ```
+
+## Prompt 3 — LangChain API tools
+
+Date: 2026-05-31
+
+Purpose: Implement LangChain tools with real HTTP calls to the local Task API.
+
+Prompt:
+
+```text
+We need to continue implementing the homework project in the current repository `langchain-hw`.
+
+Current state:
+
+* Project scaffold exists.
+* The project uses `uv`.
+* Local FastAPI mock API is implemented in `app/api.py`.
+* API has been manually tested:
+
+  * `GET /health`
+  * `POST /tasks`
+  * `GET /tasks`
+  * `GET /stats`
+* We must keep tracking all development prompts in `prompts/used_prompts.md`.
+
+Task for this step:
+Implement LangChain tools that call the local FastAPI Task API through real HTTP requests.
+
+Important homework criteria this step must satisfy:
+
+* At least one API-tool must be implemented as a real LangChain tool.
+* The tool must perform a real API call.
+* The tool must print/log debug output to the console showing the tool call and API method.
+* Later we need to reference file and line ranges where:
+
+  * the tool is declared;
+  * the HTTP call is executed;
+  * debug output is printed.
+
+Files to modify:
+
+* `app/tools/task_api_tool.py`
+* `README.md`
+* `report.md`
+* `prompts/used_prompts.md`
+
+Implementation requirements:
+
+1. In `app/tools/task_api_tool.py`, implement separate LangChain tools using the `@tool` decorator.
+
+Create these tools:
+
+* `create_task`
+
+  * Calls `POST /tasks`
+  * Input arguments:
+
+    * `title: str`
+    * `priority: str = "normal"`
+    * `description: str = ""`
+  * Returns a JSON string with the API response.
+
+* `get_task`
+
+  * Calls `GET /tasks/{task_id}`
+  * Input:
+
+    * `task_id: int`
+  * Returns a JSON string with the API response.
+
+* `update_task_status`
+
+  * Calls `PATCH /tasks/{task_id}/status`
+  * Input:
+
+    * `task_id: int`
+    * `status: str`
+  * Returns a JSON string with the API response.
+
+* `list_tasks`
+
+  * Calls `GET /tasks`
+  * Optional inputs:
+
+    * `status: str | None = None`
+    * `priority: str | None = None`
+  * Returns a JSON string with the API response.
+
+* `get_task_stats`
+
+  * Calls `GET /stats`
+  * No inputs.
+  * Returns a JSON string with the API response.
+
+2. Use `requests` for HTTP calls.
+
+3. Read API base URL from environment variable:
+
+   * `TASK_API_BASE_URL`
+   * Default: `http://localhost:8000`
+
+4. Load `.env` via `python-dotenv`.
+
+5. Add helper functions if useful:
+
+   * `_api_base_url()`
+   * `_handle_response(response)`
+   * `_to_json_string(data)`
+
+6. Every tool must print a debug line before making the request.
+
+Examples:
+
+    print(f"[TOOL CALL] create_task -> POST {url} payload={payload}")
+    print(f"[TOOL CALL] get_task -> GET {url}")
+
+7. Error handling:
+
+   * If API returns non-2xx, return a JSON string like:
+
+       {
+         "ok": false,
+         "error": "...",
+         "status_code": 404
+       }
+
+   * If request fails, return:
+
+       {
+         "ok": false,
+         "error": "...",
+         "exception_type": "ConnectionError"
+       }
+
+8. Successful tool response should return a JSON string like:
+
+     {
+       "ok": true,
+       "data": { ... }
+     }
+
+9. Export all tools through a list:
+
+     TASK_TOOLS = [
+         create_task,
+         get_task,
+         update_task_status,
+         list_tasks,
+         get_task_stats,
+     ]
+
+10. Add a small direct debug/test block if appropriate:
+
+     if __name__ == "__main__":
+         ...
+
+    But do not require this for normal use.
+
+11. Update README.md:
+
+    * Add a section "LangChain API tools".
+    * List tools and corresponding HTTP API methods.
+    * Mention that tool calls print debug output like `[TOOL CALL] ...`.
+
+12. Update report.md:
+
+    * Add a section about implemented tools.
+    * Include a placeholder for line references, for example:
+
+      * `app/tools/task_api_tool.py:Lx-Ly` — tool declaration and HTTP request
+      * `app/tools/task_api_tool.py:Lx-Ly` — debug print
+    * We will fill exact line numbers after implementation.
+
+13. Append this full prompt as a new section in `prompts/used_prompts.md`:
+
+    Section title:
+    `## Prompt 3 — LangChain API tools`
+
+    Include:
+
+    * Date: current date.
+    * Purpose: Implement LangChain tools with real HTTP calls to the local Task API.
+    * Full prompt text in a fenced `text` block.
+
+14. Do not commit anything.
+
+15. After changes, show:
+
+    * Modified files.
+    * A short implementation summary.
+    * The tool names and matching API methods.
+    * How to manually test at least one tool.
+```

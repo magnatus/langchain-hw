@@ -82,6 +82,39 @@ curl -X PATCH http://localhost:8000/tasks/1/status \
 curl http://localhost:8000/stats
 ```
 
+## LangChain API tools
+
+The agent calls the mock Task API through LangChain tools defined in
+[`app/tools/task_api_tool.py`](app/tools/task_api_tool.py). Each tool performs
+a real HTTP request via `requests` and returns a JSON string.
+
+| Tool | HTTP API method |
+|------|-----------------|
+| `create_task` | `POST /tasks` |
+| `get_task` | `GET /tasks/{task_id}` |
+| `update_task_status` | `PATCH /tasks/{task_id}/status` |
+| `list_tasks` | `GET /tasks` |
+| `get_task_stats` | `GET /stats` |
+
+Every tool prints a debug line to the console before the request, e.g.:
+
+```text
+[TOOL CALL] create_task -> POST http://localhost:8000/tasks payload={...}
+[TOOL CALL] get_task -> GET http://localhost:8000/tasks/1
+```
+
+The base URL is read from `TASK_API_BASE_URL` (default `http://localhost:8000`).
+
+### Manually test the tools
+
+```bash
+# 1. Start the API in one terminal
+uv run uvicorn app.api:app --reload
+
+# 2. In another terminal, run the tools' debug block
+uv run python -m app.tools.task_api_tool
+```
+
 ## Project structure
 
 ```text
